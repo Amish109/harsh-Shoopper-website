@@ -1,3 +1,6 @@
+
+
+
 const port = 4000;
 const express = require("express");
 const app = express();
@@ -8,15 +11,73 @@ const path = require("path");
 const cors = require("cors");
 const { type } = require("os");
 const { log } = require("console");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
+// const bodyParser = require("body-parser");
+
+
+
 
 app.use(express.json());
 app.use(cors());
+// app.use(bodyParser.json());
+
+const razorpay = new Razorpay({
+    key_id: "rzp_test_W1njiux8uI153d",
+    key_secret: "o1mq3yguXlLvoq27zJYErMjx"
+})
+
+
+
+
+    
+
+
 
 
 // Database connection with MongoDb
 mongoose.connect("mongodb+srv://harshdevadkar:harshdevadkar7781@cluster0.dwz1l.mongodb.net/shopper-website")
 
 // API CREATION
+
+
+// for payment
+app.post("/api/orders/create-order", async (req, res)=>{
+    try {
+        const { amount, currency } = req.body; // Amount in smallest currency unit (paise)
+      console.log("amount in backend",amount);
+        const options = {
+          amount: amount * 100, // Convert amount to paisa
+          currency: currency || "INR",
+          receipt: `order_rcptid_${Date.now()}`,
+        };
+        const order = await razorpay.orders.create(options);
+        res.json({ success: true, order });
+      } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error });
+      }
+});
+
+
+app.post("/api/orders/verify-payment", async (req, res)=>{
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+          req.body;
+        console.log("razorpay_order_id, razorpay_payment_id, razorpay_signature",razorpay_order_id, razorpay_payment_id, razorpay_signature);
+        const generated_signature = crypto
+          .createHmac("sha256", "o1mq3yguXlLvoq27zJYErMjx")
+          .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+          .digest("hex");
+        console.log("generated_signature",generated_signature)
+        if (generated_signature === razorpay_signature) {
+          res.json({ success: true, message: "Payment verified successfully" });
+        } else {
+          res.status(400).json({ success: false, message: "Invalid signature" });
+        }
+      } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error });
+      }
+})
 
 
 app.get("/",(req,res)=>{
