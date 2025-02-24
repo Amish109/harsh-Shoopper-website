@@ -203,26 +203,30 @@ app.get('/allproducts', async (req,res)=>{
 })
 
 // schema creating for User Model
-
-const Users = mongoose.model('Users',{
-    name:{
+const Users = mongoose.model('Users', {
+    name: {
         type: String,
     },
-    email:{
+    email: {
         type: String,
-        unique:true,
+        unique: true,
     },
-    password:{
+    password: {
         type: String,
     },
-    cartData:{
+    cartData: {
         type: Object,
     },
-    date:{
+    role: {
+        type: String,
+        enum: ['admin', 'user'], // Only allows 'admin' or 'user'
+        default: 'user', // Default role is 'user'
+    },
+    date: {
         type: Date,
         default: Date.now,
     }
-})
+});
 
 
 // Creating Endpoint for registering User 
