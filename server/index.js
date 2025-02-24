@@ -1,6 +1,3 @@
-
-
-
 const port = 4000;
 const express = require("express");
 const app = express();
@@ -14,33 +11,16 @@ const { log } = require("console");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 // const bodyParser = require("body-parser");
-
-
-
-
 app.use(express.json());
 app.use(cors());
 // app.use(bodyParser.json());
-
 const razorpay = new Razorpay({
     key_id: "rzp_test_W1njiux8uI153d",
     key_secret: "o1mq3yguXlLvoq27zJYErMjx"
 })
-
-
-
-
-    
-
-
-
-
 // Database connection with MongoDb
 mongoose.connect("mongodb+srv://harshdevadkar:harshdevadkar7781@cluster0.dwz1l.mongodb.net/shopper-website")
-
 // API CREATION
-
-
 // for payment
 app.post("/api/orders/create-order", async (req, res)=>{
     try {
@@ -57,8 +37,6 @@ app.post("/api/orders/create-order", async (req, res)=>{
         res.status(500).json({ success: false, message: "Server error", error });
       }
 });
-
-
 app.post("/api/orders/verify-payment", async (req, res)=>{
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
@@ -79,25 +57,19 @@ app.post("/api/orders/verify-payment", async (req, res)=>{
       }
 })
 
-
 app.get("/",(req,res)=>{
     res.send("Express app is running")
 })
-
 // Image Storage Engine
-
 const storage = multer.diskStorage({
     destination:'./upload/images',
     filename:(req,file,cb)=>{
         return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
     }
 })
-
 const upload = multer({storage:storage})
-
 // Creating Upload Endpoint for images
-app.use('/images',express.static('upload/images'))
-
+app.use('/images',express.static('temp/upload/images'))
 app.post("/upload",upload.single('product'),(req,res)=>{
     console.log("req",req)
   try {
@@ -109,12 +81,7 @@ app.post("/upload",upload.single('product'),(req,res)=>{
    res.send(error) 
   }
 })
-
-
-
 // Schema for creating products 
-
-
 const Product = mongoose.model("Product",{
     id:{
         type: Number,
@@ -181,10 +148,7 @@ app.post('/addproduct', async (req,res)=>{
         name: req.body.name,
     })
 })
-
-
 // Creating Api For Deleting Products
-
 app.post('/removeproduct', async (req,res)=>{
     await Product.findOneAndDelete({id:req.body.id});
     console.log("Removed");
@@ -193,15 +157,12 @@ app.post('/removeproduct', async (req,res)=>{
         name:req.body.name
     })
 })
-
 // Creating Api For Getting All Products
-
 app.get('/allproducts', async (req,res)=>{
     let products = await Product.find({});
     console.log("All Products Fetched");
     res.send(products);
 })
-
 // schema creating for User Model
 const Users = mongoose.model('Users', {
     name: {
@@ -227,12 +188,7 @@ const Users = mongoose.model('Users', {
         default: Date.now,
     }
 });
-
-
 // Creating Endpoint for registering User 
-
-
-
 app.post('/signup',async (req,res)=>{
     let check = await Users.findOne({email:req.body.email});
     if(check){
@@ -261,7 +217,6 @@ app.post('/signup',async (req,res)=>{
     const token = jwt.sign(data,'secret_ecom')
     res.json({success:true,token})
 })
-
 
 // creating endpoint for user login
 
